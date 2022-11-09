@@ -10,6 +10,3 @@ To run the tests:
 
     jest -i
 # Express-Jobly
-# Express-Jobly
-# Express-Jobly
-# Express-Jobly
