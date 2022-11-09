@@ -18,16 +18,16 @@ class Company {
 
   static async create({ handle, name, description, numEmployees, logoUrl }) {
     const duplicateCheck = await db.query(
-        `SELECT handle
+      `SELECT handle
            FROM companies
            WHERE handle = $1`,
-        [handle]);
+      [handle]);
 
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate company: ${handle}`);
 
     const result = await db.query(
-        `INSERT INTO companies(
+      `INSERT INTO companies(
           handle,
           name,
           description,
@@ -36,13 +36,13 @@ class Company {
            VALUES
              ($1, $2, $3, $4, $5)
            RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
-        [
-          handle,
-          name,
-          description,
-          numEmployees,
-          logoUrl,
-        ],
+      [
+        handle,
+        name,
+        description,
+        numEmployees,
+        logoUrl,
+      ],
     );
     const company = result.rows[0];
 
@@ -56,7 +56,7 @@ class Company {
 
   static async findAll() {
     const companiesRes = await db.query(
-        `SELECT handle,
+      `SELECT handle,
                 name,
                 description,
                 num_employees AS "numEmployees",
@@ -76,14 +76,14 @@ class Company {
 
   static async get(handle) {
     const companyRes = await db.query(
-        `SELECT handle,
+      `SELECT handle,
                 name,
                 description,
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
            FROM companies
            WHERE handle = $1`,
-        [handle]);
+      [handle]);
 
     const company = companyRes.rows[0];
 
@@ -106,11 +106,11 @@ class Company {
 
   static async update(handle, data) {
     const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          numEmployees: "num_employees",
-          logoUrl: "logo_url",
-        });
+      data,
+      {
+        numEmployees: "num_employees",
+        logoUrl: "logo_url",
+      });
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
@@ -133,11 +133,11 @@ class Company {
 
   static async remove(handle) {
     const result = await db.query(
-        `DELETE
+      `DELETE
            FROM companies
            WHERE handle = $1
            RETURNING handle`,
-        [handle]);
+      [handle]);
     const company = result.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
@@ -155,20 +155,75 @@ class Company {
    *
    */
   static async filter(data) {
-    // call some helper function to convert JS object into SQL
+    if ("minEmployees" in data && "maxEmployees" in data) {
+      if (data.minEmployees > data.maxEmployees) {
+        throw new BadRequestError('Min employees greater than max employees');
+      }
+    }
+
+    const { filters, values } = this.sqlForCompanyFilter(data);
+
+
     const results = await db.query(
       `
       SELECT
           handle,
           name,
           description,
-          numEmployees,
-          logoUrl
+          num_employees AS "numEmployees",
+          logo_url AS "logoUrl"
         FROM companies
-        WHERE name = $1, (num_employees >= minEmployees AND num_employees <= maxEmployees)
-      `
-    )
+        WHERE ${filters}
+      `, values
+    );
+      console.log(results.rows)
+    return results.rows;
   }
+
+  /** Accepts JS object data that we'll use to search and filter our companies table.
+ * Return an object containing SQL syntax WHERE statement that will be used to
+ * filter our table and query parameters.
+ *    Input: {
+ *      name: 'java',
+ *      minEmployees: 1,
+ *      maxEmployees: 10
+ *    }
+ *    Output: {
+ *      filters: `
+ *      name ILIKE $1 AND
+ *       num_employees >= $2 AND num_employees <= $3
+ *      `,
+ *      values: ['%java%', 1, 10]
+ *    }
+ *
+ */
+
+  static sqlForCompanyFilter(dataToFilter) {
+    const keys = Object.keys(dataToFilter);
+    const values = Object.values(dataToFilter);
+    if (keys.length === 0) throw new BadRequestError("No data");
+
+    const filters = keys.map((filter, idx) => {
+      if (filter === 'name') {
+        values[idx] = '%' + values[idx] + '%';
+        return `${filter} ILIKE $${idx + 1}`;
+      }
+      if (filter === 'minEmployees') {
+        return `num_employees >= $${idx + 1}`;
+      }
+      if (filter === 'maxEmployees') {
+        return `num_employees <= $${idx + 1}`;
+      }
+    });
+
+    return {
+      filters: filters.join(" AND "),
+      values: values
+    };
+  }
+
 }
+
+
 
 module.exports = Company;

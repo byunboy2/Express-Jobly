@@ -3,6 +3,7 @@
 const db = require("../db.js");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const Company = require("./company.js");
+
 const {
   commonBeforeAll,
   commonBeforeEach,
@@ -31,7 +32,7 @@ describe("create", function () {
     expect(company).toEqual(newCompany);
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'new'`);
     expect(result.rows).toEqual([
@@ -129,7 +130,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -156,7 +157,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -193,7 +194,7 @@ describe("remove", function () {
   test("works", async function () {
     await Company.remove("c1");
     const res = await db.query(
-        "SELECT handle FROM companies WHERE handle='c1'");
+      "SELECT handle FROM companies WHERE handle='c1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -204,5 +205,56 @@ describe("remove", function () {
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
     }
+  });
+
+  /************************************** sql filter conversion */
+
+  describe("convert", function () {
+    test("Converts js object to partial sql clause and an query params array",
+      function () {
+        const input = {
+          name: 'java',
+          minEmployees: 1,
+          maxEmployees: 10
+        };
+
+        const convertedJsObj = Company.sqlForCompanyFilter(input);
+        expect(convertedJsObj).toEqual({
+          filters:
+            `name ILIKE $1 AND num_employees >= $2 AND num_employees <= $3`,
+          values: ['%java%', 1, 10]
+        });
+      });
+  });
+
+  test("no data", function () {
+    try {
+      Company.sqlForCompanyFilter({});
+      throw new Error("This is wrong");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+
+});
+
+
+/************************************** Filter*/
+
+describe("filter", function () {
+  test("run a query based on test data", async function () {
+    const test = {
+      name: "C1"
+    };
+    const queryResult = await Company.filter(test);
+    expect(queryResult).toEqual(
+      [{
+        handle: "c1",
+        name: "C1",
+        description:"Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img"
+      }]
+    );
   });
 });
