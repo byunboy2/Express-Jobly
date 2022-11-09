@@ -14,7 +14,7 @@ const { BadRequestError } = require("../expressError");
 
 /** POST /auth/token:  { username, password } => { token }
  *
- * Returns JWT token which can be used to authenticate further requests.
+ * Returns JWT token which can be used to authenticate further requests once logged in.
  *
  * Authorization required: none
  */

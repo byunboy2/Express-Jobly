@@ -1,6 +1,13 @@
 const { BadRequestError } = require("../expressError");
 
 // THIS NEEDS SOME GREAT DOCUMENTATION.
+/** Accepts data and jsToSql that needs to updated and returns
+ * {firstName: 'Aliya', age: 32}, {firstName:"first_name"}
+ * =>{
+ *    setCols:'"first_name"=$1, "age"=$2' ,
+ *    values: ["Aliya",32],
+ * }
+ */
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
