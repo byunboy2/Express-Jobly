@@ -69,7 +69,7 @@ router.get("/", async function (req, res, next) {
     }
   }
 
-  const companies = await Company.filter(/*ADDDDD CODE*/);
+  const companies = await Company.filter(req.params);
 
 });
 

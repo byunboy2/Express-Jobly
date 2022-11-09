@@ -142,7 +142,33 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
-}
 
+  /** Filter and return companies based on input data
+   *    Input: {
+   *      name: 'java',
+   *      minEmployees: 1,
+   *      maxEmployees: 10
+   *    }
+   *    Output: {
+   *      companies: [ { handle, name, description, numEmployees, logoUrl }, ...]
+   *    }
+   *
+   */
+  static async filter(data) {
+    // call some helper function to convert JS object into SQL
+    const results = await db.query(
+      `
+      SELECT
+          handle,
+          name,
+          description,
+          numEmployees,
+          logoUrl
+        FROM companies
+        WHERE name = $1, (num_employees >= minEmployees AND num_employees <= maxEmployees)
+      `
+    )
+  }
+}
 
 module.exports = Company;
