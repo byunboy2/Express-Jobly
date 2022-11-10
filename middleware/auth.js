@@ -34,12 +34,41 @@ function authenticateJWT(req, res, next) {
  */
 
 function ensureLoggedIn(req, res, next) {
-    if (!res.locals.user) throw new UnauthorizedError();
-    return next();
+  if (!res.locals.user) throw new UnauthorizedError();
+  return next();
 }
 
+
+
+
+/** Middleware: Check if user has admin authorization.
+ *
+ * else raise unauthorized error
+ *
+ */
+
+function ensureIsAdmin(req, res, next) {
+  console.log("this is the res.locals.user",res.locals.user)
+  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
+  return next();
+  // check if the current user has admin flag else next()
+}
+
+
+/** Middleware: Check if user is the owner of the account in question or
+ * is admin
+ *
+ * else raise unauthorized error
+ */
+
+function checkAccountAuth(req, res, next) {
+
+  // check if the current user has admin flag or is the user else next()
+}
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
+  ensureIsAdmin,
+  checkAccountAuth,
 };

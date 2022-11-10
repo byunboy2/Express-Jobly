@@ -1,3 +1,5 @@
+"use strict";
+
 const { BadRequestError } = require("../expressError");
 
 /** Accepts data and jsToSql that needs to be updated and returns
@@ -7,7 +9,7 @@ const { BadRequestError } = require("../expressError");
  *    values: ["Aliya",32],
  * }
  */
-// Describe what jsToSql, be pedantic 
+// Describe what jsToSql, be pedantic
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
   if (keys.length === 0) throw new BadRequestError("No data");

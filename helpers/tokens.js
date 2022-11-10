@@ -1,3 +1,5 @@
+"use strict";
+
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 
@@ -11,7 +13,7 @@ function createToken(user) {
     username: user.username,
     isAdmin: user.isAdmin || false,
   };
-
+  console.log(payload)
   return jwt.sign(payload, SECRET_KEY);
 }
 
