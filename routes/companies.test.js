@@ -96,6 +96,59 @@ describe("GET /companies", function () {
     });
   });
 
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  /*********************************************************************/
+  test("ok for filtered data", async function() {
+    const resp = await request(app)
+      .get("/companies")
+      .query({name: "1", minEmployees: 1})
+      .set('Accept', 'html/text');
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies: [{
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img"
+      }]
+    });
+  });
+
+
+  test("extra properties JSON structure", async function() {
+    const resp = await request(app)
+      .get("/companies")
+      .query({companyName: 'c1'});
+
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual([
+        'instance is not allowed to have the additional property "companyName"'
+    ]);
+  });
+
+  test("wrong data types JSON structure", async function() {
+    const resp = await request(app)
+      .get("/companies")
+      .query({name: 1, minEmployees: 'a', maxEmployees: -1});
+
+    console.log('ERRRRRRRRRRRORORORORORO', resp.body);
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual([
+        'instance is not allowed to have the additional property "companyName"'
+    ]);
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This

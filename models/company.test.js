@@ -242,11 +242,12 @@ describe("remove", function () {
 /************************************** Filter*/
 
 describe("filter", function () {
-  test("run a query based on test data", async function () {
+  test("run a query based on name filter", async function () {
     const test = {
-      name: "C1"
+      name: "1"
     };
     const queryResult = await Company.filter(test);
+
     expect(queryResult).toEqual(
       [{
         handle: "c1",
@@ -256,5 +257,45 @@ describe("filter", function () {
         logoUrl: "http://c1.img"
       }]
     );
+  });
+
+  test("run a query using numEmployees Min and Max filters", async function() {
+    const testFilter = {
+      minEmployees: 2,
+      maxEmployees: 3
+    }
+    const results = await Company.filter(testFilter);
+
+    expect(results).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description:"Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img"
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description:"Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img"
+      }
+    ]);
+  });
+
+  test("invalid min max numEmployees filters", async function() {
+    const testFilter = {
+      minEmployees: 3,
+      maxEmployees: 2
+    }
+
+    try {
+      const results = await Company.filter(testFilter);
+      throw new Error('You should no reach this!');
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual('Min employees greater than max employees');
+    }
   });
 });

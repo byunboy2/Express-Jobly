@@ -31,6 +31,7 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
     companyNewSchema,
     { required: true }
   );
+
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
     throw new BadRequestError(errs);
@@ -52,6 +53,12 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  if (Object.keys(req.query).length === 0) {
+    const companies = await Company.findAll();
+    return res.json({ companies });
+  }
+
+  // req.query?.minEmployees = Number(minEmployees)
   const validator = jsonschema.validate(
     req.query,
     companyFilterSchema,
@@ -59,13 +66,12 @@ router.get("/", async function (req, res, next) {
   );
 
   if (!validator.valid) {
-    const companies = await Company.findAll();
-    return res.json({ companies });
+    const errs = validator.errors.map(e => e.stack);
+    throw new BadRequestError(errs);
   }
 
-
   const companies = await Company.filter(req.query);
-
+  return res.json({ companies })
 });
 
 /** GET /[handle]  =>  { company }
