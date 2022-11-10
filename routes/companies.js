@@ -57,10 +57,13 @@ router.get("/", async function (req, res, next) {
     const companies = await Company.findAll();
     return res.json({ companies });
   }
+  const filters = { ...req.query };
 
-  // req.query?.minEmployees = Number(minEmployees)
+  filters.minEmployees = Number(filters.minEmployees);
+  filters.maxEmployees = Number(filters.maxEmployees);
+
   const validator = jsonschema.validate(
-    req.query,
+    filters,
     companyFilterSchema,
     { required: true }
   );
@@ -71,7 +74,7 @@ router.get("/", async function (req, res, next) {
   }
 
   const companies = await Company.filter(req.query);
-  return res.json({ companies })
+  return res.json({ companies });
 });
 
 /** GET /[handle]  =>  { company }

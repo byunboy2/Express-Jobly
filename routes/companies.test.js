@@ -110,8 +110,7 @@ describe("GET /companies", function () {
   test("ok for filtered data", async function() {
     const resp = await request(app)
       .get("/companies")
-      .query({name: "1", minEmployees: 1})
-      .set('Accept', 'html/text');
+      .query({name: "c", minEmployees: 1, maxEmployees: 2});
 
     expect(resp.statusCode).toEqual(200);
     expect(resp.body).toEqual({
@@ -121,7 +120,14 @@ describe("GET /companies", function () {
         description: "Desc1",
         numEmployees: 1,
         logoUrl: "http://c1.img"
-      }]
+      },
+    {
+      handle: "c2",
+      name: "C2",
+      description: "Desc2",
+      numEmployees: 2,
+      logoUrl: "http://c2.img"
+    }]
     });
   });
 
@@ -129,7 +135,7 @@ describe("GET /companies", function () {
   test("extra properties JSON structure", async function() {
     const resp = await request(app)
       .get("/companies")
-      .query({companyName: 'c1'});
+      .query({companyName: 'c1',name: "c", minEmployees: 1, maxEmployees: 2});
 
     expect(resp.statusCode).toEqual(400);
     expect(resp.body.error.message).toEqual([
@@ -142,10 +148,10 @@ describe("GET /companies", function () {
       .get("/companies")
       .query({name: 1, minEmployees: 'a', maxEmployees: -1});
 
-    console.log('ERRRRRRRRRRRORORORORORO', resp.body);
     expect(resp.statusCode).toEqual(400);
     expect(resp.body.error.message).toEqual([
-        'instance is not allowed to have the additional property "companyName"'
+      "instance.minEmployees is not of a type(s) integer",
+      "instance.maxEmployees must be greater than or equal to 1"
     ]);
   });
 

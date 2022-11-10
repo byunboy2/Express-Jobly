@@ -208,7 +208,7 @@ describe("remove", function () {
   });
 
   /************************************** sql filter conversion */
-
+  // only pass in name test 
   describe("convert", function () {
     test("Converts js object to partial sql clause and an query params array",
       function () {
@@ -292,7 +292,7 @@ describe("filter", function () {
 
     try {
       const results = await Company.filter(testFilter);
-      throw new Error('You should no reach this!');
+      throw new Error('You should not reach this!');
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
       expect(err.message).toEqual('Min employees greater than max employees');
