@@ -48,10 +48,8 @@ function ensureLoggedIn(req, res, next) {
  */
 
 function ensureIsAdmin(req, res, next) {
-  console.log("this is the res.locals.user",res.locals.user)
-  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
+  if (!res.locals.user?.isAdmin) throw new UnauthorizedError();
   return next();
-  // check if the current user has admin flag else next()
 }
 
 
@@ -62,8 +60,12 @@ function ensureIsAdmin(req, res, next) {
  */
 
 function checkAccountAuth(req, res, next) {
+  if (req.params.username === res.locals.user.username ||
+      res.locals.user.isAdmin === true) {
+      return next();
+  }
 
-  // check if the current user has admin flag or is the user else next()
+  throw new UnauthorizedError();
 }
 
 module.exports = {

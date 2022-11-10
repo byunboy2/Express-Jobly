@@ -6,6 +6,7 @@ const {
   authenticateJWT,
   ensureLoggedIn,
   ensureIsAdmin,
+  checkAccountAuth,
 } = require("./auth");
 
 
@@ -74,3 +75,22 @@ describe("ensureAdmin", function () {
     expect(() => ensureIsAdmin(req, res, next)).toThrowError();
   });
 });
+
+describe("checkAccountAuth", function () {
+  test("Is logged in as the user endpoint it accessing", function () {
+    const req = { params: { username: 'u1'} };
+    const res = { locals: { user: { username: 'u1', isAdmin: false } } };
+    checkAccountAuth(req, res, next);
+  });
+
+  test("Is Admin", function () {
+    const req = { params: { username: 'u1'} };
+    const res = { locals: { user: { username: 'admin', isAdmin: true } } };
+    checkAccountAuth(req, res, next);
+  });
+
+  test("not admin or correct user", function () {
+    const req = { params: { username: 'u1'} };
+    const res = { locals: { user: { username: 'u2', isAdmin: false } } };
+  })
+})
