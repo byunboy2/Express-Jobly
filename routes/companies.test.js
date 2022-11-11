@@ -5,15 +5,13 @@ const request = require("supertest");
 const db = require("../db");
 const app = require("../app");
 
-const { createToken } = require("../helpers/tokens.js");
-const adminToken = createToken({ username: "admin", isAdmin: true });
-
 const {
   commonBeforeAll,
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  adminToken,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -65,7 +63,7 @@ describe("POST /companies", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
-  test("not ok for users", async function () {
+  test("unauth for non-admin users", async function () {
     const resp = await request(app)
         .post("/companies")
         .send(newCompany)
@@ -264,6 +262,7 @@ describe("PATCH /companies/:handle", function () {
     expect(resp.statusCode).toEqual(400);
   });
 
+  //think about grouping tests together
   test("non admin request", async function () {
     const resp = await request(app)
         .patch(`/companies/c1`)
@@ -300,11 +299,11 @@ describe("DELETE /companies/:handle", function () {
     expect(resp.statusCode).toEqual(404);
   });
 
-  test("does not work for users", async function () {
+  test("unauth for non-admin users", async function () {
     const resp = await request(app)
         .delete(`/companies/c1`)
         .set("authorization", `Bearer ${u1Token}`);
-        
+
     expect(resp.statusCode).toEqual(401);
     expect(resp.body.error.message === "Unauthorized").toBeTruthy();
   });
