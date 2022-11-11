@@ -91,38 +91,37 @@ class Job {
     return job;
   }
 
-/** Update company data with `data`.
+/** Update job data with `data`.
    *
    * This is a "partial update" --- it's fine if data doesn't contain all the
    * fields; this only changes provided ones.
    *
-   * Data can include: {name, description, numEmployees, logoUrl}
+   * Data can include: {title, salary, equity, companyHandle}
    *
-   * Returns {handle, name, description, numEmployees, logoUrl}
+   * Returns {id, title, salary, equity, companyHandle}
    *
    * Throws NotFoundError if not found.
    */
 
- static async update(handle, data) {
+ static async update(id, data) {
   const { setCols, values } = sqlForPartialUpdate(
     data,
     {
-      numEmployees: "num_employees",
-      logoUrl: "logo_url",
+      companyHandle: "company_handle"
     });
-  const handleVarIdx = "$" + (values.length + 1);
+  const idVarIdx = "$" + (values.length + 1);
 
   const querySql = `
-    UPDATE companies
+    UPDATE jobs
     SET ${setCols}
-      WHERE handle = ${handleVarIdx}
-      RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`;
-  const result = await db.query(querySql, [...values, handle]);
-  const company = result.rows[0];
+      WHERE id = ${idVarIdx}
+      RETURNING id, title, salary, equity, company_handle AS "companyHandle"`;
+  const result = await db.query(querySql, [...values, id]);
+  const job = result.rows[0];
 
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
+  if (!job) throw new NotFoundError(`No job: ${id}`);
 
-  return company;
+  return job;
 }
 
 /** Delete given company from database; returns undefined.
@@ -130,16 +129,16 @@ class Job {
  * Throws NotFoundError if company not found.
  **/
 
-static async remove(handle) {
+static async remove(id) {
   const result = await db.query(
     `DELETE
-         FROM companies
-         WHERE handle = $1
-         RETURNING handle`,
-    [handle]);
-  const company = result.rows[0];
+         FROM jobs
+         WHERE id = $1
+         RETURNING id`,
+    [id]);
+  const job = result.rows[0];
 
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
+  if (!job) throw new NotFoundError(`No job: ${job}`);
 }
 
 /** Filter and return companies based on input data
@@ -153,31 +152,31 @@ static async remove(handle) {
  *    }
  *
  */
-static async filter(data) {
-  if ("minEmployees" in data && "maxEmployees" in data) {
-    if (data.minEmployees > data.maxEmployees) {
-      throw new BadRequestError('Min employees greater than max employees');
-    }
-  }
+// static async filter(data) {
+//   if ("minEmployees" in data && "maxEmployees" in data) {
+//     if (data.minEmployees > data.maxEmployees) {
+//       throw new BadRequestError('Min employees greater than max employees');
+//     }
+//   }
 
-  const { filters, values } = this.sqlForCompanyFilter(data);
+//   const { filters, values } = this.sqlForCompanyFilter(data);
 
 
-  const results = await db.query(
-    `
-    SELECT
-        handle,
-        name,
-        description,
-        num_employees AS "numEmployees",
-        logo_url AS "logoUrl"
-      FROM companies
-      WHERE ${filters}
-    `, values
-  );
-  console.log(results.rows);
-  return results.rows;
-}
+//   const results = await db.query(
+//     `
+//     SELECT
+//         handle,
+//         name,
+//         description,
+//         num_employees AS "numEmployees",
+//         logo_url AS "logoUrl"
+//       FROM companies
+//       WHERE ${filters}
+//     `, values
+//   );
+//   console.log(results.rows);
+//   return results.rows;
+// }
 
 /** Accepts JS object data that we'll use to search and filter our companies table.
 * Return an object containing SQL syntax WHERE statement that will be used to
@@ -197,29 +196,29 @@ static async filter(data) {
 *
 */
 
-static sqlForCompanyFilter(dataToFilter) {
-  const keys = Object.keys(dataToFilter);
-  const values = Object.values(dataToFilter);
-  if (keys.length === 0) throw new BadRequestError("No data");
-  // .map() uneeded, rather use three if statements, iteration is great if unknown amount
-  const filters = keys.map((filter, idx) => {
-    if (filter === 'name') {
-      values[idx] = '%' + values[idx] + '%';
-      return `${filter} ILIKE $${idx + 1}`;
-    }
-    if (filter === 'minEmployees') {
-      return `num_employees >= $${idx + 1}`;
-    }
-    if (filter === 'maxEmployees') {
-      return `num_employees <= $${idx + 1}`;
-    }
-  });
+// static sqlForCompanyFilter(dataToFilter) {
+//   const keys = Object.keys(dataToFilter);
+//   const values = Object.values(dataToFilter);
+//   if (keys.length === 0) throw new BadRequestError("No data");
+//   // .map() uneeded, rather use three if statements, iteration is great if unknown amount
+//   const filters = keys.map((filter, idx) => {
+//     if (filter === 'name') {
+//       values[idx] = '%' + values[idx] + '%';
+//       return `${filter} ILIKE $${idx + 1}`;
+//     }
+//     if (filter === 'minEmployees') {
+//       return `num_employees >= $${idx + 1}`;
+//     }
+//     if (filter === 'maxEmployees') {
+//       return `num_employees <= $${idx + 1}`;
+//     }
+//   });
 
-  return {
-    filters: filters.join(" AND "),
-    values: values
-  };
-}
+//   return {
+//     filters: filters.join(" AND "),
+//     values: values
+//   };
+// }
 
 
 }

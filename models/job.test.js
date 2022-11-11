@@ -142,7 +142,6 @@ describe("update", function () {
            WHERE id = 1`);
 
     expect(result.rows).toEqual([{
-      id: 1,
       title: "New Job",
       salary: 1234,
       equity: "0.1234",
@@ -153,8 +152,8 @@ describe("update", function () {
   test("works: null fields", async function () {
     const updateDataSetNulls = {
       title: "New Job",
-      salary: NULL,
-      equity: NULL,
+      salary: null,
+      equity: null,
       companyHandle: "c1",
     };
 
@@ -171,8 +170,8 @@ describe("update", function () {
 
     expect(result.rows).toEqual([{
       title: "New Job",
-      salary: NULL,
-      equity: NULL,
+      salary: null,
+      equity: null,
       companyHandle: "c1",
     }]);
   });
@@ -188,7 +187,7 @@ describe("update", function () {
 
   test("bad request with no data", async function () {
     try {
-      await Company.update(1, {});
+      await Job.update(1, {});
       throw new Error("fail test, you shouldn't get here");
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
@@ -198,22 +197,23 @@ describe("update", function () {
 
 // /************************************** remove */
 
-// describe("remove", function () {
-//   test("works", async function () {
-//     await Company.remove("c1");
-//     const res = await db.query(
-//       "SELECT handle FROM companies WHERE handle='c1'");
-//     expect(res.rows.length).toEqual(0);
-//   });
+describe("remove", function () {
+  test("works", async function () {
+    await Job.remove(1);
+    const res = await db.query(
+      "SELECT id FROM jobs WHERE id=1");
+    expect(res.rows.length).toEqual(0);
+  });
 
-//   test("not found if no such company", async function () {
-//     try {
-//       await Company.remove("nope");
-//       throw new Error("fail test, you shouldn't get here");
-//     } catch (err) {
-//       expect(err instanceof NotFoundError).toBeTruthy();
-//     }
-//   });
+  test("not found if no such company", async function () {
+    try {
+      await Job.remove(10000);
+      throw new Error("fail test, you shouldn't get here");
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
 
 //   /************************************** sql filter conversion */
 //   // only pass in name test
