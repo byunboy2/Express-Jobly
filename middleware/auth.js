@@ -61,8 +61,8 @@ function ensureIsAdmin(req, res, next) {
 
 function checkAccountAuth(req, res, next) {
   if (req.params.username === res.locals.user.username ||
-      res.locals.user.isAdmin === true) {
-      return next();
+    res.locals.user.isAdmin === true) {
+    return next();
   }
 
   throw new UnauthorizedError();

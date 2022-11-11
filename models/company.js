@@ -202,7 +202,7 @@ class Company {
     const keys = Object.keys(dataToFilter);
     const values = Object.values(dataToFilter);
     if (keys.length === 0) throw new BadRequestError("No data");
-    // .map() uneeded, rather use three if statements, iteration is great if unknown amount 
+    // .map() uneeded, rather use three if statements, iteration is great if unknown amount
     const filters = keys.map((filter, idx) => {
       if (filter === 'name') {
         values[idx] = '%' + values[idx] + '%';
