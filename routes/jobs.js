@@ -40,7 +40,6 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
   return res.status(201).json({ job });
 });
 
-module.exports = router;
 
 /** GET /  =>
  *   { jobs: [ { title,salary,equity,companyHandle }, ...] }
@@ -115,3 +114,14 @@ router.get("/:id", async function (req, res, next) {
   return res.json({ job });
 });
 
+/** DELETE /[id]  =>  { deleted: id }
+ *
+ * Authorization: login as admin
+ */
+
+ router.delete("/:id", ensureIsAdmin, async function (req, res, next) {
+  await Job.remove(req.params.id);
+  return res.json({ deleted: req.params.id });
+});
+
+module.exports = router;
