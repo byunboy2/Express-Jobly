@@ -215,138 +215,127 @@ describe("remove", function () {
   });
 });
 
-  /************************************** sql filter conversion */
-  describe("convert", function () {
-    test("sql partial filter conversion for equity true",
-      function () {
-        const input = {
-          title: 'job1',
-          minSalary: 1,
-          hasEquity: true
-        };
+/************************************** sql filter conversion */
+describe("convert", function () {
+  test("sql partial filter conversion for equity true",
+    function () {
+      const input = {
+        title: 'job1',
+        minSalary: 1,
+        hasEquity: true
+      };
 
-        const convertedJsObj = Job.sqlForJobFilter(input);
-        expect(convertedJsObj).toEqual({
-          filters:
-            `title ILIKE $1 AND salary >= $2 AND equity > $3`,
-          values: ['%job1%', 1, 0]
-        });
+      const convertedJsObj = Job.sqlForJobFilter(input);
+      expect(convertedJsObj).toEqual({
+        filters:
+          `title ILIKE $1 AND salary >= $2 AND equity > $3`,
+        values: ['%job1%', 1, 0]
       });
-
-    test("sql partial filter conversion for equity false",
-      function () {
-        const input = {
-          title: 'job1',
-          minSalary: 1,
-          hasEquity: false
-        };
-
-        const convertedJsObj = Job.sqlForJobFilter(input);
-        expect(convertedJsObj).toEqual({
-          filters:
-            `title ILIKE $1 AND salary >= $2`,
-          values: ['%job1%', 1]
-        });
-      });
-
-    test("sql partial filter conversion for equity not included",
-      function () {
-        const input = {
-          title: 'job1',
-          minSalary: 1
-        };
-
-        const convertedJsObj = Job.sqlForJobFilter(input);
-        expect(convertedJsObj).toEqual({
-          filters:
-            `title ILIKE $1 AND salary >= $2`,
-          values: ['%job1%', 1]
-        });
-      });
-
-      test("sql partial filter conversion for partial data",
-      function () {
-        const input = {
-          minSalary: 1,
-        };
-
-        const convertedJsObj = Job.sqlForJobFilter(input);
-        expect(convertedJsObj).toEqual({
-          filters:
-            `salary >= $1`,
-          values: [1]
-        });
-      });
-
-    test("no data", function () {
-      try {
-        Job.sqlForJobFilter({});
-        throw new Error("This is wrong");
-      } catch (err) {
-        expect(err instanceof BadRequestError).toBeTruthy();
-      }
     });
+
+  test("sql partial filter conversion for equity false",
+    function () {
+      const input = {
+        title: 'job1',
+        minSalary: 1,
+        hasEquity: false
+      };
+
+      const convertedJsObj = Job.sqlForJobFilter(input);
+      expect(convertedJsObj).toEqual({
+        filters:
+          `title ILIKE $1 AND salary >= $2`,
+        values: ['%job1%', 1]
+      });
+    });
+
+  test("sql partial filter conversion for equity not included",
+    function () {
+      const input = {
+        title: 'job1',
+        minSalary: 1
+      };
+
+      const convertedJsObj = Job.sqlForJobFilter(input);
+      expect(convertedJsObj).toEqual({
+        filters:
+          `title ILIKE $1 AND salary >= $2`,
+        values: ['%job1%', 1]
+      });
+    });
+
+  test("sql partial filter conversion for partial data",
+    function () {
+      const input = {
+        minSalary: 1,
+      };
+
+      const convertedJsObj = Job.sqlForJobFilter(input);
+      expect(convertedJsObj).toEqual({
+        filters:
+          `salary >= $1`,
+        values: [1]
+      });
+    });
+
+  test("no data", function () {
+    try {
+      Job.sqlForJobFilter({});
+      throw new Error("This is wrong");
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
   });
+});
 
 
 
 /************************************** Filter*/
 
-// describe("filter", function () {
-//   test("run a query based on name filter", async function () {
-//     const test = {
-//       name: "1"
-//     };
-//     const queryResult = await Company.filter(test);
+describe("filter", function () {
+  test("run a query based on title filter", async function () {
+    const test = {
+      title: "J1"
+    };
+    const queryResult = await Job.filter(test);
 
-//     expect(queryResult).toEqual(
-//       [{
-//         handle: "c1",
-//         name: "C1",
-//         description: "Desc1",
-//         numEmployees: 1,
-//         logoUrl: "http://c1.img"
-//       }]
-//     );
-//   });
+    expect(queryResult).toEqual(
+      [{
+        title: "J1",
+        salary: 1,
+        equity: "0.00000001",
+        companyHandle: "c1",
+      }]
+    );
+  });
 
-//   test("run a query using numEmployees Min and Max filters", async function () {
-//     const testFilter = {
-//       minEmployees: 2,
-//       maxEmployees: 3
-//     };
-//     const results = await Company.filter(testFilter);
+  test("run a query using test filter minSalary and hasEquity", async function () {
+    const testFilter = {
+    minSalary: 3,
+    hasEquity: true
+  };
+  const results = await Job.filter(testFilter);
 
-//     expect(results).toEqual([
-//       {
-//         handle: "c2",
-//         name: "C2",
-//         description: "Desc2",
-//         numEmployees: 2,
-//         logoUrl: "http://c2.img"
-//       },
-//       {
-//         handle: "c3",
-//         name: "C3",
-//         description: "Desc3",
-//         numEmployees: 3,
-//         logoUrl: "http://c3.img"
-//       }
-//     ]);
-//   });
+  expect(results).toEqual([
+    {
+      title: "J3",
+      salary: 3,
+      equity: "0.00000003",
+      companyHandle: "c3",
+    }
+  ]);
+});
 
-//   test("invalid min max numEmployees filters", async function () {
-//     const testFilter = {
-//       minEmployees: 3,
-//       maxEmployees: 2
-//     };
-
-//     try {
-//       const results = await Company.filter(testFilter);
-//       throw new Error('You should not reach this!');
-//     } catch (err) {
-//       expect(err instanceof BadRequestError).toBeTruthy();
-//       expect(err.message).toEqual('Min employees greater than max employees');
-//     }
-//   });
-// });
+  // test("invalid equity data type", async function () {
+  //   const testFilter = {
+  //     hasEquity: .05
+  //   };
+  //   try {
+  //     const results = await Job.filter(testFilter);
+  //     throw new Error('You should not reach this!');
+  //   } catch (err) {
+  //     expect(err instanceof ).toBeTruthy();
+  //     expect(err.message).toEqual('Input a boolean value');
+  //   }
+  // });
+});

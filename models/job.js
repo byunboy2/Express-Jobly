@@ -147,42 +147,35 @@ class Job {
     if (!job) throw new NotFoundError(`No job: ${job}`);
   }
 
-  /** Filter and return companies based on input data
+  /** Filter and return jobs based on input data
    *    Input: {
-   *      name: 'java',
-   *      minEmployees: 1,
-   *      maxEmployees: 10
+   *        title: "j1"
+   *        minSalary: 1
+   *        hasEquity: true
    *    }
    *    Output: {
-   *      companies: [ { handle, name, description, numEmployees, logoUrl }, ...]
+   *      companies: [ { title,salary,equity,companyHandle  }, ...]
    *    }
    *
    */
-  // static async filter(data) {
-  //   if ("minEmployees" in data && "maxEmployees" in data) {
-  //     if (data.minEmployees > data.maxEmployees) {
-  //       throw new BadRequestError('Min employees greater than max employees');
-  //     }
-  //   }
+  static async filter(data) {
 
-  //   const { filters, values } = this.sqlForCompanyFilter(data);
+    const { filters, values } = this.sqlForJobFilter(data);
 
+    const results = await db.query(
+      `
+      SELECT
+          title,
+          salary,
+          equity,
+          company_handle AS "companyHandle"
+        FROM jobs
+        WHERE ${filters}
+      `, values
+    );
 
-  //   const results = await db.query(
-  //     `
-  //     SELECT
-  //         handle,
-  //         name,
-  //         description,
-  //         num_employees AS "numEmployees",
-  //         logo_url AS "logoUrl"
-  //       FROM companies
-  //       WHERE ${filters}
-  //     `, values
-  //   );
-  //   console.log(results.rows);
-  //   return results.rows;
-  // }
+    return results.rows;
+  }
 
   /** Accepts JS object data that we'll use to search and filter our jobs table.
   * Return an object containing SQL syntax WHERE statement that will be used to
