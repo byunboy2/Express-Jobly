@@ -72,6 +72,31 @@ async function commonBeforeAll() {
     password: "admin",
     isAdmin: true,
   });
+  await db.query(`
+  ALTER SEQUENCE jobs_id_seq RESTART WITH 1;
+  `);
+  
+  await Job.create(
+    {
+      title: 'J1',
+      salary: 1,
+      equity: "0.00000001",
+      companyHandle: 'c1'
+    });
+  await Job.create(
+    {
+      title: 'J2',
+      salary: 2,
+      equity: "0.00000002",
+      companyHandle: 'c2'
+    });
+  await Job.create(
+    {
+      title: 'J3',
+      salary: 3,
+      equity: "0.00000003",
+      companyHandle: 'c3'
+    });
 }
 
 async function commonBeforeEach() {
