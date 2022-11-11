@@ -123,72 +123,110 @@ describe("GET /jobs", function () {
             equity: "0.00000003",
             companyHandle: 'c3'
           },
+          {
+            title: 'J4',
+            salary: 4,
+            equity: null,
+            companyHandle: 'c3'
+          },
         ],
     });
   });
 
-  // test("ok for filtered data", async function() {
-  //   const resp = await request(app)
-  //     .get("/companies")
-  //     .query({name: "c", minEmployees: 1, maxEmployees: 2});
+  test("ok for filtered data hasEquity: true", async function() {
+    const resp = await request(app)
+      .get("/jobs")
+      .query({title: "J", minSalary: 1, hasEquity: true});
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      jobs: [{
+        title: 'J1',
+        salary: 1,
+        equity: "0.00000001",
+        companyHandle: 'c1'
+      },
+      {
+        title: 'J2',
+        salary: 2,
+        equity: "0.00000002",
+        companyHandle: 'c2'
+      },
+      {
+        title: 'J3',
+        salary: 3,
+        equity: "0.00000003",
+        companyHandle: 'c3'
+      }]
+    });
+  });
 
-  //   expect(resp.statusCode).toEqual(200);
-  //   expect(resp.body).toEqual({
-  //     companies: [{
-  //       handle: "c1",
-  //       name: "C1",
-  //       description: "Desc1",
-  //       numEmployees: 1,
-  //       logoUrl: "http://c1.img"
-  //     },
-  //   {
-  //     handle: "c2",
-  //     name: "C2",
-  //     description: "Desc2",
-  //     numEmployees: 2,
-  //     logoUrl: "http://c2.img"
-  //   }]
-  //   });
-  // });
+  test("ok for filtered data hasEquity: false", async function() {
+    const resp = await request(app)
+      .get("/jobs")
+      .query({title: "J", minSalary: 1, hasEquity: false});
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      jobs: [{
+        title: 'J1',
+        salary: 1,
+        equity: "0.00000001",
+        companyHandle: 'c1'
+      },
+      {
+        title: 'J2',
+        salary: 2,
+        equity: "0.00000002",
+        companyHandle: 'c2'
+      },
+      {
+        title: 'J3',
+        salary: 3,
+        equity: "0.00000003",
+        companyHandle: 'c3'
+      },
+      {
+        title: 'J4',
+        salary: 4,
+        equity: null,
+        companyHandle: 'c3'
+      }]
+    });
+  });
 
 
-  // test("extra properties JSON structure", async function () {
-  //   const resp = await request(app)
-  //     .get("/jobs")
-  //     .query(
-  //       {
-  //         title: 'j1',
-  //         salary: 1,
-  //         equity: .000001,
-  //         companyHandle: "c1",
-  //         location: "Podunk"
-  //       });
+  test("extra properties JSON structure", async function () {
+    const resp = await request(app)
+      .get("/jobs")
+      .query(
+        {
+          title: 'J1',
+          minSalary: 1,
+          hasEquity: true,
+          location: "Podunk"
+        });
 
-  //   expect(resp.statusCode).toEqual(400);
-  //   expect(resp.body.error.message).toEqual([
-  //     // "instance.salary is not of a type(s) integer",
-  //     // "instance.equity is not of a type(s) number",
-  //     "instance is not allowed to have the additional property \"location\""
-  //   ]);
-  // });
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual([
+      "instance is not allowed to have the additional property \"location\""
+    ]);
+  });
 
-  // test("wrong data types JSON structure", async function () {
-  //   const resp = await request(app)
-  //     .get("/jobs")
-  //     .query(
-  //       {
-  //         title: 'j1',
-  //         salary: 1,
-  //         equity: ".000001",
-  //         companyHandle: "c1",
-  //       });
+  test("wrong data types JSON structure", async function () {
+    const resp = await request(app)
+      .get("/jobs")
+      .query(
+        {
+          title: 1,
+          minSalary: 1,
+          hasEquity: ".000001",
+        });
 
-  //   expect(resp.statusCode).toEqual(400);
-  //   expect(resp.body.error.message).toEqual([
-  //     "instance.salary is not of a type(s) integer",
-  //     "instance.equity is not of a type(s) number"
-  //   ]);
-  // });
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual([
+      "instance.hasEquity is not of a type(s) boolean"
+    ]);
+  });
 
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---

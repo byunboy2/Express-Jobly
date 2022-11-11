@@ -373,7 +373,7 @@ describe("filter", function () {
     ]);
   });
 
-  test("invalid equity data type", async function () {
+  test("invalid hasEquity data type", async function () {
     const testFilter = {
       hasEquity: .05
     };
@@ -382,7 +382,33 @@ describe("filter", function () {
       throw new Error('You should not reach this!');
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
-      expect(err.message).toEqual(['Invalid equity data type']);
+      expect(err.message).toEqual(['Invalid hasEquity data type']);
+    }
+  });
+
+  test("invalid minSalary data type", async function () {
+    const testFilter = {
+      minSalary: 'not-a-number'
+    };
+    try {
+      const results = await Job.filter(testFilter);
+      throw new Error('You should not reach this!');
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual(['Invalid minSalary data type']);
+    }
+  });
+
+  test("invalid title data type", async function () {
+    const testFilter = {
+      title: 1
+    };
+    try {
+      const results = await Job.filter(testFilter);
+      throw new Error('You should not reach this!');
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual(['Invalid title data type']);
     }
   });
 });

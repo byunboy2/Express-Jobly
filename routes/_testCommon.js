@@ -75,7 +75,7 @@ async function commonBeforeAll() {
   await db.query(`
   ALTER SEQUENCE jobs_id_seq RESTART WITH 1;
   `);
-  
+
   await Job.create(
     {
       title: 'J1',
@@ -95,6 +95,13 @@ async function commonBeforeAll() {
       title: 'J3',
       salary: 3,
       equity: "0.00000003",
+      companyHandle: 'c3'
+    });
+  await Job.create(
+    {
+      title: 'J4',
+      salary: 4,
+      equity: null,
       companyHandle: 'c3'
     });
 }

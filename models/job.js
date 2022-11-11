@@ -161,10 +161,10 @@ class Job {
   static async filter(data) {
     const errs = [];
     if ('hasEquity' in data) {
-      if (typeof data.hasEquity !== 'boolean') errs.push('Invalid equity data type');
+      if (typeof data.hasEquity !== 'boolean') errs.push('Invalid hasEquity data type');
     }
     if ('minSalary' in data) {
-      if (typeof data.minSalary !== 'number') errs.push('Invalid salary data type');
+      if (typeof data.minSalary !== 'number') errs.push('Invalid minSalary data type');
     }
     if ('title' in data) {
       if (typeof data.title !== 'string') errs.push('Invalid title data type');

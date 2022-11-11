@@ -59,11 +59,14 @@ router.get("/", async function (req, res, next) {
     return res.json({ jobs });
   }
 
-  // const jobs = req.query;
   const filters = { ...req.query };
 
-  filters.salary = Number(filters.salary);
-  filters.equity = Number(filters.equity);
+  filters.minSalary = Number(filters.minSalary);
+  if (filters.hasEquity === 'true') {
+    filters.hasEquity = true;
+  } else if (filters.hasEquity === 'false') {
+    filters.hasEquity = false;
+  }
 
   const validator = jsonschema.validate(
     filters,
@@ -76,7 +79,7 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  // const companies = await Company.filter(req.query);
+  const jobs = await Job.filter(filters);
   return res.json({ jobs });
 });
 
