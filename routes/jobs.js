@@ -11,6 +11,7 @@ const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
+const jobFilterSchema = require("../schemas/jobFilter.json");
 
 const router = new express.Router();
 
@@ -44,6 +45,10 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
 /** GET /  =>
  *   { jobs: [ { title,salary,equity,companyHandle }, ...] }
  *
+ * Can filter on provided search filters:
+ *  - title
+ *  - minSalary
+ *  - hasEquity (if true, filter to jobs that provide a non-zero amount of equity)
  *
  * Authorization required: none
  */
@@ -55,16 +60,16 @@ router.get("/", async function (req, res, next) {
   }
 
   // const jobs = req.query;
-  // const filters = { ...req.query };
+  const filters = { ...req.query };
 
-  // filters.salary = Number(filters.salary);
-  // filters.equity = Number(filters.equity);
+  filters.salary = Number(filters.salary);
+  filters.equity = Number(filters.equity);
 
-  // const validator = jsonschema.validate(
-  //   filters,
-  //   jobFilterSchema,
-  //   { required: true }
-  // );
+  const validator = jsonschema.validate(
+    filters,
+    jobFilterSchema,
+    { required: true }
+  );
 
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);

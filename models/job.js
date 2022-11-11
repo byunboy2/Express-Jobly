@@ -184,47 +184,55 @@ class Job {
   //   return results.rows;
   // }
 
-  /** Accepts JS object data that we'll use to search and filter our companies table.
+  /** Accepts JS object data that we'll use to search and filter our jobs table.
   * Return an object containing SQL syntax WHERE statement that will be used to
   * filter our table and query parameters.
   *    Input: {
-  *      name: 'java',
-  *      minEmployees: 1,
-  *      maxEmployees: 10
+  *      title: 'job1',
+  *      minSalary: 1,
+  *      hasEquity: true
   *    }
   *    Output: {
   *      filters: `
-  *      name ILIKE $1 AND
-  *       num_employees >= $2 AND num_employees <= $3
+  *      title ILIKE $1 AND
+  *      salary >= $2 AND
+  *      equity > $3 (if hasEquity is false, we don't include this)
   *      `,
-  *      values: ['%java%', 1, 10]
+  *      values: ['%job1%', 1, 0]
   *    }
   *
   */
 
-  // static sqlForCompanyFilter(dataToFilter) {
-  //   const keys = Object.keys(dataToFilter);
-  //   const values = Object.values(dataToFilter);
-  //   if (keys.length === 0) throw new BadRequestError("No data");
-  //   // .map() uneeded, rather use three if statements, iteration is great if unknown amount
-  //   const filters = keys.map((filter, idx) => {
-  //     if (filter === 'name') {
-  //       values[idx] = '%' + values[idx] + '%';
-  //       return `${filter} ILIKE $${idx + 1}`;
-  //     }
-  //     if (filter === 'minEmployees') {
-  //       return `num_employees >= $${idx + 1}`;
-  //     }
-  //     if (filter === 'maxEmployees') {
-  //       return `num_employees <= $${idx + 1}`;
-  //     }
-  //   });
+  static sqlForJobFilter(dataToFilter) {
+    if (dataToFilter.hasEquity === false) {
+      delete dataToFilter.hasEquity;
+    }
 
-  //   return {
-  //     filters: filters.join(" AND "),
-  //     values: values
-  //   };
-  // }
+    const keys = Object.keys(dataToFilter);
+    const values = Object.values(dataToFilter);
+    if (keys.length === 0) throw new BadRequestError("No data");
+
+    const filters = keys.map((filter, idx) => {
+      if (filter === 'title') {
+        values[idx] = '%' + values[idx] + '%';
+        return `${filter} ILIKE $${idx + 1}`;
+      }
+      if (filter === 'minSalary') {
+        return `salary >= $${idx + 1}`;
+      }
+      if (filter === 'hasEquity') {
+        if (dataToFilter[filter] === true) {
+          values[idx] = 0;
+          return `equity > $${idx + 1}`;
+        }
+      }
+    });
+
+    return {
+      filters: filters.join(" AND "),
+      values: values
+    };
+  }
 
 
 }
