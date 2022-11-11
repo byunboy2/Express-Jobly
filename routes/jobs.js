@@ -37,3 +37,5 @@ const router = new express.Router();
   const job = await Job.create(req.body);
   return res.status(201).json({ job });
 });
+
+module.exports = router;
