@@ -159,6 +159,19 @@ class Job {
    *
    */
   static async filter(data) {
+    const errs = [];
+    if ('hasEquity' in data) {
+      if (typeof data.hasEquity !== 'boolean') errs.push('Invalid equity data type');
+    }
+    if ('minSalary' in data) {
+      if (typeof data.minSalary !== 'number') errs.push('Invalid salary data type');
+    }
+    if ('title' in data) {
+      if (typeof data.title !== 'string') errs.push('Invalid title data type');
+    }
+
+    if (errs.length !== 0) throw new BadRequestError(errs);
+
 
     const { filters, values } = this.sqlForJobFilter(data);
 

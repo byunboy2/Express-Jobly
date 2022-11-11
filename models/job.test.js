@@ -87,6 +87,12 @@ describe("findAll", function () {
         equity: "0.00000003",
         companyHandle: "c3",
       },
+      {
+        title: "J4",
+        salary: 4,
+        equity: null,
+        companyHandle: "c3",
+      },
     ]);
   });
 });
@@ -295,47 +301,88 @@ describe("convert", function () {
 describe("filter", function () {
   test("run a query based on title filter", async function () {
     const test = {
-      title: "J1"
+      title: "J"
     };
     const queryResult = await Job.filter(test);
 
-    expect(queryResult).toEqual(
-      [{
+    expect(queryResult).toEqual([
+      {
         title: "J1",
         salary: 1,
         equity: "0.00000001",
         companyHandle: "c1",
-      }]
-    );
+      },
+      {
+        title: "J2",
+        salary: 2,
+        equity: "0.00000002",
+        companyHandle: "c2",
+      },
+      {
+        title: "J3",
+        salary: 3,
+        equity: "0.00000003",
+        companyHandle: "c3",
+      },
+      {
+        title: "J4",
+        salary: 4,
+        equity: null,
+        companyHandle: "c3",
+      },
+    ]);
   });
 
-  test("run a query using test filter minSalary and hasEquity", async function () {
+  test("run a query using test filter minSalary and hasEquity: true", async function () {
     const testFilter = {
     minSalary: 3,
     hasEquity: true
   };
-  const results = await Job.filter(testFilter);
+    const results = await Job.filter(testFilter);
 
-  expect(results).toEqual([
-    {
-      title: "J3",
-      salary: 3,
-      equity: "0.00000003",
-      companyHandle: "c3",
+    expect(results).toEqual([
+      {
+        title: "J3",
+        salary: 3,
+        equity: "0.00000003",
+        companyHandle: "c3",
+      }
+    ]);
+  });
+
+  test("run a query using test filter minSalary and hasEquity: false", async function () {
+    const testFilter = {
+    minSalary: 3,
+    hasEquity: false
+  };
+    const results = await Job.filter(testFilter);
+
+    expect(results).toEqual([
+      {
+        title: "J3",
+        salary: 3,
+        equity: "0.00000003",
+        companyHandle: "c3",
+      },
+      {
+        title: "J4",
+        salary: 4,
+        equity: null,
+        companyHandle: "c3",
+      }
+    ]);
+  });
+
+  test("invalid equity data type", async function () {
+    const testFilter = {
+      hasEquity: .05
+    };
+    try {
+      const results = await Job.filter(testFilter);
+      throw new Error('You should not reach this!');
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err.message).toEqual(['Invalid equity data type']);
     }
-  ]);
-});
-
-  // test("invalid equity data type", async function () {
-  //   const testFilter = {
-  //     hasEquity: .05
-  //   };
-  //   try {
-  //     const results = await Job.filter(testFilter);
-  //     throw new Error('You should not reach this!');
-  //   } catch (err) {
-  //     expect(err instanceof ).toBeTruthy();
-  //     expect(err.message).toEqual('Input a boolean value');
-  //   }
-  // });
+  });
 });
