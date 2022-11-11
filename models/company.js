@@ -84,7 +84,9 @@ class Company {
            FROM companies
            WHERE handle = $1`,
       [handle]);
-
+      // TODO: join companies table with jobs table and pull all jobs related to company
+      // use new method in today's lecture to package data appropriately
+      
     const company = companyRes.rows[0];
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
