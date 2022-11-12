@@ -39,7 +39,13 @@ async function commonBeforeAll() {
       description: "Desc3",
       logoUrl: "http://c3.img",
     });
-
+  await Company.create({
+      handle: "c5",
+      name: "C5",
+      numEmployees: 5,
+      description: "Desc5",
+      logoUrl: "http://c5.img",
+    });
   await User.register({
     username: "u1",
     firstName: "U1F",

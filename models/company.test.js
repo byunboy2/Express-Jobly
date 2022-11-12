@@ -99,6 +99,13 @@ describe("get", function () {
       description: "Desc1",
       numEmployees: 1,
       logoUrl: "http://c1.img",
+      jobs : [{
+        id: 1,
+        title: "J1",
+        salary: 1,
+        equity: 1e-8,
+        companyHandle: "c1"
+      }]
     });
   });
 
@@ -110,6 +117,8 @@ describe("get", function () {
       expect(err instanceof NotFoundError).toBeTruthy();
     }
   });
+
+
 });
 
 /************************************** update */
@@ -208,7 +217,7 @@ describe("remove", function () {
   });
 
   /************************************** sql filter conversion */
-  // only pass in name test 
+  // only pass in name test
   describe("convert", function () {
     test("Converts js object to partial sql clause and an query params array",
       function () {

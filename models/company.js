@@ -3,6 +3,7 @@
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
+const Job = require("./job");
 
 /** Related functions for companies. */
 
@@ -75,19 +76,52 @@ class Company {
    **/
 
   static async get(handle) {
-    const companyRes = await db.query(
-      `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
-           WHERE handle = $1`,
+    const checkJob = await db.query(
+      `SELECT title
+      from JOBS
+      WHERE company_handle = $1`,
       [handle]);
-      // TODO: join companies table with jobs table and pull all jobs related to company
-      // use new method in today's lecture to package data appropriately
-      
-    const company = companyRes.rows[0];
+
+    let company;
+
+    const companyWithJobsRes = await db.query(
+      `SELECT handle,
+      name,
+      description,
+      num_employees AS "numEmployees",
+      logo_url AS "logoUrl",
+      JSON_AGG(
+        JSON_BUILD_OBJECT(
+          'id', id ,
+          'title', title,
+          'salary' , salary,
+          'equity', equity,
+          'companyHandle', company_handle
+        )
+      ) as jobs
+      FROM companies AS c
+      JOIN jobs AS j ON (c.handle = j.company_handle)
+      WHERE handle =  $1
+      GROUP BY c.handle,j.title
+      ORDER BY c.name;`,
+      [handle]);
+
+    const companyWithoutJobsRes = await db.query(
+      `SELECT handle,
+        name,
+        description,
+        num_employees AS "numEmployees",
+        logo_url AS "logoUrl",
+        FROM companies AS c
+        WHERE handle =  $1`,
+      [handle]);
+
+
+    if (checkJob.rows.length === 0) {
+      company = companyWithoutJobsRes.rows[0];
+    } else {
+      company = companyWithJobsRes.rows[0];
+    }
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
 
